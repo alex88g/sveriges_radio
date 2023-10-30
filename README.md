@@ -4,21 +4,21 @@
 
 **Schedule App** is a Flutter-based mobile application that elegantly displays a schedule list fetched from the SR API. Designed with finesse, it presents data with style and functionality.
 
-## Main Features
+## 🌟 Main Features
 
-### Efficient Data Fetching
+### 📡 Efficient Data Fetching
 **Description:** Fetches and dynamically renders data from the specified SR API.
 
-### Sleek User Interface
+### 🎨 Sleek User Interface
 **Description:** Card-based design with each showcasing an optional image (or a placeholder when absent) accompanied by related text.
 
-### 3D Visualization
+### 🪄 3D Visualization
 **Description:** Enhances user experience with subtle 3D effects on the cards.
 
-### Robust Error Handling
+### 🔒 Robust Error Handling
 **Description:** Integrated error-handling mechanisms to tackle potential data-fetching issues.
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -41,12 +41,12 @@ flutter run
 
 ### Additional Information
 
-### Screenshots
+### 📸 Screenshots
 ![Skärmbild 2023-10-30 212406](https://github.com/alex88g/sveriges_radio/assets/113544188/e6865a57-437a-421e-9e16-621ae62e46f7)
 
-### Acknowledgments
+### 📚 Acknowledgments
 Appreciation to the Flutter team for their comprehensive documentation.
 Special thanks to api.sr.se for providing the required data.
 
-### License
+### 📜 License
 This project is governed by the IT- Högskoaln license.
