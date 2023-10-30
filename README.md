@@ -1,4 +1,4 @@
-# sveriges_radio
+# sveriges_radio 📻
 
 ## Overview
 
@@ -25,18 +25,18 @@
 Before diving in, ensure Flutter is set up on your machine. If not, refer to Flutter's official [Installation Guide](https://flutter.dev/docs/get-started/install).
 
 ### Installation Steps
-
 **Clone the Repository:**
+
 git clone 
 
-### Setup and Dependencies:
-Move into the project directory and fetch dependencies.
+### etup and Dependencies:**
+**Move into the project directory and fetch dependencies.**
 
 cd sveriges_radio
 flutter pub get
 
 ### Running the App:
-Start the app on your preferred device or emulator.
+**Start the app on your preferred device or emulator.**
 flutter run
 
 ### Additional Information
