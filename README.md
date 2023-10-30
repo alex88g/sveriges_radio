@@ -29,3 +29,24 @@ Before diving in, ensure Flutter is set up on your machine. If not, refer to Flu
 1. **Clone the Repository**:
 ```bash
 git clone [repository_url]
+
+Setup and Dependencies:
+Move into the project directory and fetch dependencies.
+
+cd sveriges_radio
+flutter pub get
+
+Running the App:
+Start the app on your preferred device or emulator.
+
+flutter run
+
+Additional Information
+Screenshots
+[Link or insert images here]
+
+Acknowledgments
+Appreciation to the Flutter team for their comprehensive documentation.
+Special thanks to api.sr.se for providing the required data.
+License
+This project is governed by the IT- Högskoaln license.
