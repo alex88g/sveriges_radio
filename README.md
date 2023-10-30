@@ -26,25 +26,22 @@ Before diving in, ensure Flutter is set up on your machine. If not, refer to Flu
 
 ### Installation Steps
 
-1. **Clone the Repository**:
-```bash
-git clone [repository_url]
+### Clone the Repository:
+git clone 
 
-**Setup and Dependencies:**
+### Setup and Dependencies:
 Move into the project directory and fetch dependencies.
 
 cd sveriges_radio
 flutter pub get
 
-**Running the App:**
+### Running the App:
 Start the app on your preferred device or emulator.
-
 flutter run
 
-**Additional Information**
+### Additional Information
 
 ### Screenshots
-
 ![Skärmbild 2023-10-30 212406](https://github.com/alex88g/sveriges_radio/assets/113544188/e6865a57-437a-421e-9e16-621ae62e46f7)
 
 ### Acknowledgments
