@@ -26,7 +26,7 @@ Before diving in, ensure Flutter is set up on your machine. If not, refer to Flu
 
 ### Installation Steps
 
-### Clone the Repository:
+**Clone the Repository:**
 git clone 
 
 ### Setup and Dependencies:
