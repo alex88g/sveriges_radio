@@ -29,7 +29,7 @@ Before diving in, ensure Flutter is set up on your machine. If not, refer to Flu
 
 git clone 
 
-### etup and Dependencies:**
+### Setup and Dependencies:**
 **Move into the project directory and fetch dependencies.**
 
 cd sveriges_radio
