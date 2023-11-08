@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Schedule App** is a Flutter-based mobile application that elegantly displays a schedule list fetched from the SR API. Designed with finesse, it presents data with style and functionality.
+**Sveriges Radio App** is a Flutter-based mobile application that elegantly displays a schedule list fetched from the SR API. Designed with finesse, it presents data with style and functionality.
 
 ## 🌟 Main Features
 
@@ -43,6 +43,9 @@ flutter run
 
 ### 📸 Screenshots
 ![Skärmbild 2023-10-30 212406](https://github.com/alex88g/sveriges_radio/assets/113544188/e6865a57-437a-421e-9e16-621ae62e46f7)
+
+### Figma 
+https://www.figma.com/file/4m9fgkmcCFsXCYsNv0bgXU/sveriges_radio?type=design&node-id=0-1&mode=design&t=M8iF5hKHLhvs1LgB-0
 
 ### 📚 Acknowledgments
 Appreciation to the Flutter team for their comprehensive documentation.
