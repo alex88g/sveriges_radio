@@ -78,7 +78,9 @@ flutter run
 ### Additional Information
 
 ### 📸 Screenshots
-![Skärmbild 2023-10-30 212406](https://github.com/alex88g/sveriges_radio/assets/113544188/e6865a57-437a-421e-9e16-621ae62e46f7)
+![Skärmbild_2023-11-09_143152-removebg-preview](https://github.com/alex88g/sveriges_radio/assets/113544188/ebcbc908-8b8e-4813-b24d-3e59218fe493)
+![Skärmbild_2023-11-09_143202-removebg-preview](https://github.com/alex88g/sveriges_radio/assets/113544188/31a7bac0-c60a-480e-b8a7-1ff368dfe608)
+
 
 ### Figma 
 https://www.figma.com/file/4m9fgkmcCFsXCYsNv0bgXU/sveriges_radio?type=design&node-id=0-1&mode=design&t=M8iF5hKHLhvs1LgB-0
