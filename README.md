@@ -2,7 +2,43 @@
 
 ## Overview
 
-**Sveriges Radio App** is a Flutter-based mobile application that elegantly displays a schedule list fetched from the SR API. Designed with finesse, it presents data with style and functionality.
+**Sveriges Radio App** The Flutter app in the code provided is a Swedish Radio Channels player. It is designed to fetch radio channels from an API, display them in a list, and allow users to tap on a channel to listen to it. 
+
+
+
+Here's a summary of its components and functionality:
+
+
+
+- **Channel Class**: Represents a radio channel with properties like id, name, imageUrl, color, and others. It includes a factory constructor to create instances from JSON data.
+
+
+
+- **MyApp Widget**: The root of the application, setting up the theme and home screen of the app.
+
+
+
+- **MyScreen Widget**: The main screen that displays a list of channels. It fetches channel data from an API and uses a `ListView.builder` to create a list.
+
+
+
+- **_buildCard Method**: Creates a card for each radio channel with a subtle 3D effect, showing the channel's image and information. Tapping on it navigates to a new screen to play the channel.
+
+
+
+- **RadioPlayerScreen Widget**: A screen that uses `AudioPlayer` to play the selected radio channel. It has play and pause functionality.
+
+
+
+- **Network Operations**: The app uses the `http` package to perform network requests to fetch channel data and audio URLs.
+
+
+
+- **Error Handling**: The app includes basic error handling for network requests.
+
+
+
+The app is simple in terms of UI, relying on Material components, but it's functional, providing users with the ability to explore and listen to various Swedish radio channels.
 
 ## 🌟 Main Features
 
@@ -42,10 +78,15 @@ flutter run
 ### Additional Information
 
 ### 📸 Screenshots
-![Skärmbild 2023-10-30 212406](https://github.com/alex88g/sveriges_radio/assets/113544188/e6865a57-437a-421e-9e16-621ae62e46f7)
+![Skärmbild_2023-11-09_143152-removebg-preview](https://github.com/alex88g/sveriges_radio/assets/113544188/ebcbc908-8b8e-4813-b24d-3e59218fe493)
+![Skärmbild_2023-11-09_143202-removebg-preview](https://github.com/alex88g/sveriges_radio/assets/113544188/31a7bac0-c60a-480e-b8a7-1ff368dfe608)
+
 
 ### Figma 
 https://www.figma.com/file/4m9fgkmcCFsXCYsNv0bgXU/sveriges_radio?type=design&node-id=0-1&mode=design&t=M8iF5hKHLhvs1LgB-0
+
+### Summary
+The app is a Swedish radio channel player. It displays a list of channels fetched via an API, where the user can select and listen to different stations. Each channel is presented with a card that contains an image and information, and can be played in a built-in media player.
 
 ### 📚 Acknowledgments
 Appreciation to the Flutter team for their comprehensive documentation.
