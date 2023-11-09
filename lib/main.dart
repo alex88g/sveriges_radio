@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 
+// Huvudfunktionen som kör appen.
 void main() => runApp(MyApp());
 
+// Klassen Channel representerar en radiokanal.
 class Channel {
   final int id;
   final String name;
@@ -28,6 +30,7 @@ class Channel {
     required this.channelType,
   });
 
+  // Factory-konstruktor för att skapa en Channel från en JSON-struktur.
   factory Channel.fromJson(Map<String, dynamic> json) {
     return Channel(
       id: json['id'],
@@ -43,10 +46,11 @@ class Channel {
   }
 }
 
-// MyApp is the root widget that initializes the app theme and home screen.
+// MyApp är roten för din applikation.
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // MaterialApp är rotnoden i din app som innehåller teman och navigation.
     return MaterialApp(
       title: 'Radio Station App',
       theme: ThemeData(
@@ -69,21 +73,34 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// MyScreen is the main screen widget that displays the list of data.
+// MyScreen är skärmen som visar en lista över kanaler.
 class MyScreen extends StatefulWidget {
   @override
   _MyScreenState createState() => _MyScreenState();
 }
 
-class _MyScreenState extends State<MyScreen> {
-  List<Channel> channels = []; // Holds the fetched channel data.
+// _MyScreenState är tillståndet för MyScreen.
+class _MyScreenState extends State<MyScreen> with TickerProviderStateMixin {
+  List<Channel> channels = [];
+  late Map<int, AnimationController> _animationControllers;
 
+  // initState körs när widgeten först skapas.
   @override
   void initState() {
     super.initState();
     fetchData();
+    _animationControllers = {};
   }
 
+  // dispose körs när widgeten tas bort från trädstrukturen.
+  @override
+  void dispose() {
+    // AnimationController-objekten måste tas bort för att frigöra resurser.
+    _animationControllers.values.forEach((controller) => controller.dispose());
+    super.dispose();
+  }
+
+  // fetchData hämtar kanaldata från ett API.
   Future<void> fetchData() async {
     final response = await http.get(Uri.parse('http://api.sr.se/api/v2/channels?format=json&pagination=false'));
     if (response.statusCode == 200) {
@@ -93,12 +110,34 @@ class _MyScreenState extends State<MyScreen> {
           .toList();
       setState(() {
         channels = fetchedChannels;
+        _initializeAnimationControllers();
       });
     } else {
+      // Om datan inte kunde hämtas kastas ett undantag.
       throw Exception('Failed to load channel data');
     }
   }
-  @override
+
+  // _initializeAnimationControllers skapar en AnimationController för varje kanalkort.
+  void _initializeAnimationControllers() {
+    channels.forEach((channel) {
+      _animationControllers[channel.id] = AnimationController(
+        duration: const Duration(milliseconds: 200),
+        vsync: this,
+      );
+    });
+  }
+
+  // _playAnimation kör en animation när ett kort trycks.
+  void _playAnimation(int id) async {
+    if (_animationControllers[id] != null) {
+      _animationControllers[id]!.forward().then((_) {
+        _animationControllers[id]!.reverse();
+      });
+    }
+  }
+
+  // build bygger användargränssnittet för MyScreen.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,158 +147,226 @@ class _MyScreenState extends State<MyScreen> {
           : ListView.builder(
               itemCount: channels.length,
               itemBuilder: (context, index) {
-                return _buildCard(channels[index]); // This will call _buildCard for each channel
+                return _buildCard(channels[index]);
               },
             ),
     );
   }
 
-  // Creates a 3D effect for the card.
-  Matrix4 _3dEffectTransform() {
-    return Matrix4.identity()
-      ..setEntry(3, 2, 0.001)
-      ..rotateY(-0.05);
-  }
-   // Constructs a card for displaying an individual channel.
+  // _buildCard skapar ett kort för en enskild kanal.
   Widget _buildCard(Channel channel) {
+    final Animation<double> scaleAnimation = Tween(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(
+        parent: _animationControllers[channel.id]!,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     return GestureDetector(
       onTap: () {
+        _playAnimation(channel.id);
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => RadioPlayerScreen(radioUrl: channel.streamUrl),
+          builder: (context) => RadioPlayerScreen(channel: channel),
         ));
       },
-      child: Transform(
-        transform: _3dEffectTransform(),
-        child: Card(
-          child: Padding(
-            padding: EdgeInsets.all(10),
-            child: Row(
-              children: [
-                _buildImage(channel.imageUrl),
-                SizedBox(width: 15),
-                _buildTextContent(channel),
-              ],
+      child: AnimatedBuilder(
+        animation: _animationControllers[channel.id]!,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: scaleAnimation.value,
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Row(
+                  children: [
+                    ClipOval(
+                      child: Image.network(
+                        channel.imageUrl,
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(channel.name, style: Theme.of(context).textTheme.headline5),
+                          SizedBox(height: 5),
+                          Text(
+                            channel.tagline,
+                            style: Theme.of(context).textTheme.subtitle1,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Displays the image of the schedule item or a placeholder if no image is available.
- Widget _buildImage(String imageUrl) {
-  print('Image URL: $imageUrl'); // Log the URL to the console for debugging
-  if (imageUrl.isNotEmpty) {
-    return ClipOval(
-      child: Image.network(
-        imageUrl,
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-      ),
-    );
-  } else {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        shape: BoxShape.circle,
-      ),
-      child: Icon(Icons.image_not_supported, color: Colors.grey[500]),
-    );
-  }
-}
-
-  // Constructs the text content (title and description) of the schedule item.
-  Widget _buildTextContent(Channel channel) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(channel.name, style: Theme.of(context).textTheme.headline5),
-          SizedBox(height: 5),
-          Text(channel.tagline, style: Theme.of(context).textTheme.subtitle1, maxLines: 2, overflow: TextOverflow.ellipsis),
-        ],
+          );
+        },
       ),
     );
   }
 }
 
-// RadioPlayerScreen is a new screen that will play the radio station.
+// RadioPlayerScreen är skärmen som spelar upp ljud för en kanal.
 class RadioPlayerScreen extends StatefulWidget {
-  final String radioUrl;
+  final Channel channel;
 
-  // Mark the radioUrl as required using the required keyword.
-  RadioPlayerScreen({Key? key, required this.radioUrl}) : super(key: key);
-  Future<String?> _getAudioUrl() async {
-  try {
-    final response = await http.get(Uri.parse('http://api.sr.se/api/v2/audiourltemplates/liveaudiotypes'));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final audioUrl = data['url'] as String?;
-      return audioUrl;
-    } else {
-      throw Exception('Failed to load audio URL');
-    }
-  } catch (e) {
-    print('Error fetching audio URL: $e');
-    return null;
-  }
-}
+  RadioPlayerScreen({Key? key, required this.channel}) : super(key: key);
 
   @override
   _RadioPlayerScreenState createState() => _RadioPlayerScreenState();
 }
 
-class _RadioPlayerScreenState extends State<RadioPlayerScreen> {
+// _RadioPlayerScreenState är tillståndet för RadioPlayerScreen.
+class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTickerProviderStateMixin {
   late AudioPlayer _audioPlayer;
+  late AnimationController _animationController;
   bool _isPlaying = false;
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
 
+  // initState körs när widgeten först skapas.
   @override
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+
+    // Lägg till lyssnare för förändringar i ljudströmmens längd och position.
+    _audioPlayer.onDurationChanged.listen((newDuration) {
+      setState(() {
+        _duration = newDuration;
+      });
+    });
+    
+
+    _audioPlayer.onPositionChanged.listen((newPosition) {
+      setState(() {
+        _position = newPosition;
+      });
+    });
+
+    // Spela upp ljudet.
     _playRadio();
   }
 
- Future<void> _playRadio() async {
-  try {
-    // Set the source of the audio to the provided URL and then play
-    await _audioPlayer.setSource(UrlSource(widget.radioUrl));
-    setState(() {
-      _isPlaying = true;
-    });
-  } catch (e) {
-    // Handle the error, possibly indicating that the URL is not valid
-    print('Error setting audio source: $e');
+  // _playRadio startar uppspelningen av ljudströmmen.
+  Future<void> _playRadio() async {
+    try {
+      await _audioPlayer.setSource(UrlSource(widget.channel.streamUrl));
+      await _audioPlayer.resume();
+      setState(() {
+        _isPlaying = true;
+      });
+    } catch (e) {
+      print('Error setting audio source: $e');
+    }
   }
-}
+
+  // dispose körs när widgeten tas bort från trädstrukturen.
   @override
   void dispose() {
-    _audioPlayer.stop();
+    _audioPlayer.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
+  // _togglePlay växlar uppspelningsstatus mellan spela och pausa.
+  void _togglePlay() async {
+    if (_isPlaying) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.resume();
+    }
+    setState(() {
+      _isPlaying = !_isPlaying;
+    });
+  }
+
+  // _fastForward spolar framåt i ljudströmmen med 10 sekunder.
+  Future<void> _fastForward() async {
+    final newPosition = _position + Duration(seconds: 10);
+    if (newPosition < _duration) {
+      await _audioPlayer.seek(newPosition);
+    }
+  }
+
+  // _rewind spolar bakåt i ljudströmmen med 10 sekunder.
+  Future<void> _rewind() async {
+    final newPosition = _position - Duration(seconds: 10);
+    if (newPosition > Duration.zero) {
+      await _audioPlayer.seek(newPosition);
+    } else {
+      await _audioPlayer.seek(Duration.zero);
+    }
+  }
+
+  // build bygger användargränssnittet för RadioPlayerScreen.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Radio Player'),
+        title: Text(widget.channel.name),
       ),
       body: Center(
-        child: IconButton(
-          icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-          onPressed: () {
-            if (_isPlaying) {
-              _audioPlayer.pause();
-            } else {
-              _audioPlayer.resume();
-            }
-            setState(() {
-              _isPlaying = !_isPlaying;
-            });
-          },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            if (widget.channel.imageUrl.isNotEmpty)
+              Image.network(
+                widget.channel.imageUrl,
+                width: 120,
+                height: 120,
+                fit: BoxFit.cover,
+              ),
+            SizedBox(height: 20),
+            Text(
+              widget.channel.name,
+              style: Theme.of(context).textTheme.headline5,
+            ),
+            Text(
+              "${_position.toString().split('.').first} / ${_duration.toString().split('.').first}",
+              style: TextStyle(fontSize: 24),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.replay_10),
+                  onPressed: _rewind,
+                ),
+                IconButton(
+                  iconSize: 64.0,
+                  icon: AnimatedIcon(
+                    icon: AnimatedIcons.play_pause,
+                    progress: _animationController,
+                  ),
+                  onPressed: () {
+                    _togglePlay();
+                    if (_isPlaying) {
+                      _animationController.forward();
+                    } else {
+                      _animationController.reverse();
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.forward_10),
+                  onPressed: _fastForward,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
