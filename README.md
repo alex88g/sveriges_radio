@@ -83,6 +83,9 @@ flutter run
 ### Figma 
 https://www.figma.com/file/4m9fgkmcCFsXCYsNv0bgXU/sveriges_radio?type=design&node-id=0-1&mode=design&t=M8iF5hKHLhvs1LgB-0
 
+### Summary
+The app is a Swedish radio channel player. It displays a list of channels fetched via an API, where the user can select and listen to different stations. Each channel is presented with a card that contains an image and information, and can be played in a built-in media player.
+
 ### 📚 Acknowledgments
 Appreciation to the Flutter team for their comprehensive documentation.
 Special thanks to api.sr.se for providing the required data.
