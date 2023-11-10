@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
+import 'dart:ui';
+
 
 // Main function that runs the app.
 void main() => runApp(MyApp());
@@ -39,7 +41,7 @@ class Channel {
       color: json['color'] ?? 'FFFFFF',
       tagline: json['tagline'] ?? '',
       siteUrl: json['siteurl'] ?? '',
-      streamUrl: json['liveaudio'] != null ? json['liveaudio']['url'] : '',
+      streamUrl: json['liveaudio']?['url'] ?? '', // Extracting the 'url' from the 'liveaudio' object.
       scheduleUrl: json['scheduleurl'] ?? '',
       channelType: json['channeltype'] ?? 'Unknown',
     );
@@ -157,25 +159,27 @@ class _MyScreenState extends State<MyScreen> with TickerProviderStateMixin {
 
   // This method builds a card for an individual channel.
   Widget _buildCard(Channel channel) {
-    final Animation<double> scaleAnimation = Tween(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(
-        parent: _animationControllers[channel.id]!,
-        curve: Curves.easeInOut,
-      ),
-    );
+  final Animation<double> scaleAnimation = Tween(begin: 1.0, end: 0.95).animate(
+    CurvedAnimation(
+      parent: _animationControllers[channel.id]!,
+      curve: Curves.easeInOut,
+    ),
+  );
 
-    return GestureDetector(
-      onTap: () {
-        _playAnimation(channel.id);
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => RadioPlayerScreen(channel: channel),
-        ));
-      },
-      child: AnimatedBuilder(
-        animation: _animationControllers[channel.id]!,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: scaleAnimation.value,
+  return GestureDetector(
+    onTap: () {
+      _playAnimation(channel.id);
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => RadioPlayerScreen(channel: channel),
+      ));
+    },
+    child: AnimatedBuilder(
+      animation: _animationControllers[channel.id]!,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: scaleAnimation.value,
+          child: Container( // Use a Container to create a background
+            color: Colors.white.withOpacity(0.5), // Semi-transparent white background
             child: Card(
               child: Padding(
                 padding: EdgeInsets.all(10),
@@ -209,12 +213,12 @@ class _MyScreenState extends State<MyScreen> with TickerProviderStateMixin {
                 ),
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-}
+          ),
+        );
+      },
+    ),
+  );
+}}
 
 // RadioPlayerScreen is the screen that plays audio for a channel.
 class RadioPlayerScreen extends StatefulWidget {
@@ -314,33 +318,65 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTicker
   }
 
   // This method builds the user interface for RadioPlayerScreen, which is the View.
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.channel.name),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            if (widget.channel.imageUrl.isNotEmpty)
-              Image.network(
-                widget.channel.imageUrl,
-                width: 120,
-                height: 120,
-                fit: BoxFit.cover,
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(widget.channel.name),
+    ),
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          if (widget.channel.imageUrl.isNotEmpty)
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.5), // Shadow with some transparency
+                    spreadRadius: 2,
+                    blurRadius: 10,
+                    offset: Offset(0, 4), // changes position of shadow
+                  ),
+                ],
               ),
-            SizedBox(height: 20),
-            Text(
-              widget.channel.name,
-              style: Theme.of(context).textTheme.headline5,
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(widget.channel.imageUrl),
+                radius: MediaQuery.of(context).size.width * 0.375, // Radius 37.5% of screen width for the circle
+              ),
             ),
-            Text(
-              "${_position.toString().split('.').first} / ${_duration.toString().split('.').first}",
-              style: TextStyle(fontSize: 24),
+          SizedBox(height: 20),
+          Text(
+            widget.channel.name,
+            style: Theme.of(context).textTheme.headline5,
+          ),
+          Text(
+            "${_position.toString().split('.').first} / ${_duration.toString().split('.').first}",
+            style: TextStyle(fontSize: 24),
+          ),
+          SizedBox(height: 20),
+          // Transparent frame Container for 3D effect
+          Container(
+            padding: EdgeInsets.all(8.0), // Padding around the icons
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2), // Semi-transparent white
+              borderRadius: BorderRadius.circular(25), // Rounded corners
+              border: Border.all(
+                color: Colors.white.withOpacity(0.5), // Semi-transparent white border
+                width: 2, // Border width
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25), // Shadow with some transparency
+                  spreadRadius: 1,
+                  blurRadius: 10,
+                  offset: Offset(0, 3), // changes position of shadow
+                ),
+              ],
             ),
-            Row(
+            child: Row(
+              mainAxisSize: MainAxisSize.min, // To wrap content in the row
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
@@ -350,7 +386,7 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTicker
                 IconButton(
                   iconSize: 64.0,
                   icon: AnimatedIcon(
-                    icon: AnimatedIcons.play_pause,
+                    icon: AnimatedIcons.pause_play,
                     progress: _animationController,
                   ),
                   onPressed: () {
@@ -368,9 +404,11 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTicker
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
