@@ -46,11 +46,11 @@ class Channel {
   }
 }
 
-// MyApp is the root of your application.
+// MyApp is the root of application.
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // MaterialApp is the root node in your app that contains themes and navigation.
+    // MaterialApp is the root node in app that contains themes and navigation.
     return MaterialApp(
       title: 'Radio Station App',
       theme: ThemeData(
