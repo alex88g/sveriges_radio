@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 
-// Huvudfunktionen som kör appen.
+// Main function that runs the app.
 void main() => runApp(MyApp());
 
-// Klassen Channel representerar en radiokanal.
+// Class Channel represents the Model in MVVM.
 class Channel {
   final int id;
   final String name;
@@ -30,7 +30,7 @@ class Channel {
     required this.channelType,
   });
 
-  // Factory-konstruktor för att skapa en Channel från en JSON-struktur.
+  // Factory constructor to create a Channel from JSON data.
   factory Channel.fromJson(Map<String, dynamic> json) {
     return Channel(
       id: json['id'],
@@ -46,11 +46,11 @@ class Channel {
   }
 }
 
-// MyApp är roten för din applikation.
+// MyApp is the root of your application.
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // MaterialApp är rotnoden i din app som innehåller teman och navigation.
+    // MaterialApp is the root node in your app that contains themes and navigation.
     return MaterialApp(
       title: 'Radio Station App',
       theme: ThemeData(
@@ -73,18 +73,20 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// MyScreen är skärmen som visar en lista över kanaler.
+// MyScreen is the screen that displays a list of channels.
 class MyScreen extends StatefulWidget {
   @override
   _MyScreenState createState() => _MyScreenState();
 }
 
-// _MyScreenState är tillståndet för MyScreen.
+// _MyScreenState is the state for MyScreen, serving as the ViewModel in MVVM.
 class _MyScreenState extends State<MyScreen> with TickerProviderStateMixin {
+  // List of channels is part of the ViewModel.
   List<Channel> channels = [];
+  // AnimationControllers are part of the ViewModel.
   late Map<int, AnimationController> _animationControllers;
 
-  // initState körs när widgeten först skapas.
+  // This method is called when the widget is first created.
   @override
   void initState() {
     super.initState();
@@ -92,15 +94,15 @@ class _MyScreenState extends State<MyScreen> with TickerProviderStateMixin {
     _animationControllers = {};
   }
 
-  // dispose körs när widgeten tas bort från trädstrukturen.
+  // This method is called when the widget is removed from the widget tree.
   @override
   void dispose() {
-    // AnimationController-objekten måste tas bort för att frigöra resurser.
+    // Dispose of AnimationController objects to release resources.
     _animationControllers.values.forEach((controller) => controller.dispose());
     super.dispose();
   }
 
-  // fetchData hämtar kanaldata från ett API.
+  // This method fetches data from an API, which is a ViewModel responsibility.
   Future<void> fetchData() async {
     final response = await http.get(Uri.parse('http://api.sr.se/api/v2/channels?format=json&pagination=false'));
     if (response.statusCode == 200) {
@@ -113,12 +115,12 @@ class _MyScreenState extends State<MyScreen> with TickerProviderStateMixin {
         _initializeAnimationControllers();
       });
     } else {
-      // Om datan inte kunde hämtas kastas ett undantag.
+      // Throw an exception if data cannot be fetched.
       throw Exception('Failed to load channel data');
     }
   }
 
-  // _initializeAnimationControllers skapar en AnimationController för varje kanalkort.
+  // This method initializes AnimationController objects for each channel card.
   void _initializeAnimationControllers() {
     channels.forEach((channel) {
       _animationControllers[channel.id] = AnimationController(
@@ -128,7 +130,7 @@ class _MyScreenState extends State<MyScreen> with TickerProviderStateMixin {
     });
   }
 
-  // _playAnimation kör en animation när ett kort trycks.
+  // This method plays an animation when a card is tapped.
   void _playAnimation(int id) async {
     if (_animationControllers[id] != null) {
       _animationControllers[id]!.forward().then((_) {
@@ -137,7 +139,7 @@ class _MyScreenState extends State<MyScreen> with TickerProviderStateMixin {
     }
   }
 
-  // build bygger användargränssnittet för MyScreen.
+  // This method builds the user interface for MyScreen, which is the View.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,7 +155,7 @@ class _MyScreenState extends State<MyScreen> with TickerProviderStateMixin {
     );
   }
 
-  // _buildCard skapar ett kort för en enskild kanal.
+  // This method builds a card for an individual channel.
   Widget _buildCard(Channel channel) {
     final Animation<double> scaleAnimation = Tween(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(
@@ -214,7 +216,7 @@ class _MyScreenState extends State<MyScreen> with TickerProviderStateMixin {
   }
 }
 
-// RadioPlayerScreen är skärmen som spelar upp ljud för en kanal.
+// RadioPlayerScreen is the screen that plays audio for a channel.
 class RadioPlayerScreen extends StatefulWidget {
   final Channel channel;
 
@@ -224,15 +226,16 @@ class RadioPlayerScreen extends StatefulWidget {
   _RadioPlayerScreenState createState() => _RadioPlayerScreenState();
 }
 
-// _RadioPlayerScreenState är tillståndet för RadioPlayerScreen.
+// _RadioPlayerScreenState is the state for RadioPlayerScreen, serving as the ViewModel in MVVM.
 class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTickerProviderStateMixin {
+  // AudioPlayer and related variables are part of the ViewModel.
   late AudioPlayer _audioPlayer;
   late AnimationController _animationController;
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
 
-  // initState körs när widgeten först skapas.
+  // This method is called when the widget is first created.
   @override
   void initState() {
     super.initState();
@@ -242,13 +245,12 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTicker
       vsync: this,
     );
 
-    // Lägg till lyssnare för förändringar i ljudströmmens längd och position.
+    // Add listeners for changes in audio stream duration and position.
     _audioPlayer.onDurationChanged.listen((newDuration) {
       setState(() {
         _duration = newDuration;
       });
     });
-    
 
     _audioPlayer.onPositionChanged.listen((newPosition) {
       setState(() {
@@ -256,11 +258,11 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTicker
       });
     });
 
-    // Spela upp ljudet.
+    // Start playing the audio.
     _playRadio();
   }
 
-  // _playRadio startar uppspelningen av ljudströmmen.
+  // This method starts the playback of the audio stream.
   Future<void> _playRadio() async {
     try {
       await _audioPlayer.setSource(UrlSource(widget.channel.streamUrl));
@@ -273,7 +275,7 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTicker
     }
   }
 
-  // dispose körs när widgeten tas bort från trädstrukturen.
+  // This method is called when the widget is removed from the widget tree.
   @override
   void dispose() {
     _audioPlayer.dispose();
@@ -281,7 +283,7 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTicker
     super.dispose();
   }
 
-  // _togglePlay växlar uppspelningsstatus mellan spela och pausa.
+  // This method toggles the playback status between play and pause.
   void _togglePlay() async {
     if (_isPlaying) {
       await _audioPlayer.pause();
@@ -293,7 +295,7 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTicker
     });
   }
 
-  // _fastForward spolar framåt i ljudströmmen med 10 sekunder.
+  // This method fast-forwards the audio stream by 10 seconds.
   Future<void> _fastForward() async {
     final newPosition = _position + Duration(seconds: 10);
     if (newPosition < _duration) {
@@ -301,7 +303,7 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTicker
     }
   }
 
-  // _rewind spolar bakåt i ljudströmmen med 10 sekunder.
+  // This method rewinds the audio stream by 10 seconds.
   Future<void> _rewind() async {
     final newPosition = _position - Duration(seconds: 10);
     if (newPosition > Duration.zero) {
@@ -311,7 +313,7 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> with SingleTicker
     }
   }
 
-  // build bygger användargränssnittet för RadioPlayerScreen.
+  // This method builds the user interface for RadioPlayerScreen, which is the View.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
